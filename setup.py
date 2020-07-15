@@ -7,15 +7,15 @@ with open('VERSION', 'r') as fh:
     version = fh.read()
 
 setuptools.setup(
-    name="APP_NAME",
+    name="exceptional_auth",
     version=version,
     author="Alex Fischer",
     author_email="alex@quadrant.net",
-    description="TODO",
+    description="Exception-based authentication helpers for django",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    # url="TODO - github repo",
-    packages=['APP_NAME'],
+    url="https://github.com/quadrant-newmedia/exceptional_auth",
+    packages=['exceptional_auth'],
     package_dir={'': 'src'},
     include_package_data=True,
     classifiers=[
