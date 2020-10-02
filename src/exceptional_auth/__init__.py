@@ -22,7 +22,8 @@ class PermissionDenied(AuthException):
 
         App developers should call require_permission() when checking for standard django permissions, but they may also raise this directly when performing other custom permission checks.
     '''
-    pass
+    def __init__(self, message=None):
+        self.message = message
 
 class NotCurrentlyAllowed(AuthException):
     '''
