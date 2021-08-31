@@ -1,3 +1,5 @@
+from django import http
+
 class AuthException(Exception):
     '''
         Base class for all of our exceptions. 
@@ -68,10 +70,9 @@ class BaseMiddleware:
             return self.not_currently_allowed(request, exception)
 
     # Site developers should override these methods
-    # Note that exceptions don't really provide any useful information, but we might attach useful attributes to them later (ie. 'missing_permission'), and we want all subclasses to be prepared to receive them
     def login_required(self, request, exception):
-        raise NotImplementedError()
+        return http.HttpResponse('Login required.', content_type='text/plain')
     def permission_denied(self, request, exception):
-        raise NotImplementedError()
+        return http.HttpResponse('Permission denied.', content_type='text/plain', status=403)
     def not_currently_allowed(self, request, exception):
-        raise NotImplementedError()
+        return http.HttpResponse(f'Not currently allowed: {exception.reason}', status=403)

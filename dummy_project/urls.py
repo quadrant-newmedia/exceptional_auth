@@ -16,6 +16,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+import exceptional_auth
+
+def login_required(request):
+    raise exceptional_auth.LoginRequired()
+def permission_denied(request):
+    raise exceptional_auth.PermissionDenied()
+def not_currently_allowed(request):
+    raise exceptional_auth.NotCurrentlyAllowed('test message')
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('login_required/', login_required),
+    path('permission_denied/', permission_denied),
+    path('not_currently_allowed/', not_currently_allowed),
 ]
