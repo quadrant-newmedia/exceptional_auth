@@ -104,7 +104,7 @@ class BaseMiddleware:
     def not_currently_allowed(self, request, exception):
         return http.HttpResponse(f'{_("Not currently allowed")}: {exception.reason}', content_type='text/plain', status=403)
 
-    def conflict(self, exception):
+    def conflict(self, request, exception):
         '''
         This implementation likely doesn't need to be overridden.
         Conflicts may be caught by view code to provide specific error messaging.
