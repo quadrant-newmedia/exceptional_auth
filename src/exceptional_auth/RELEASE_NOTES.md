@@ -1,3 +1,6 @@
+## 0.4.0
+Django 4 support
+
 ### 0.3.1
 Fix 0.3.0
 

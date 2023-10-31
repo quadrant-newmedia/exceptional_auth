@@ -109,5 +109,17 @@ class BaseMiddleware:
         This implementation likely doesn't need to be overridden.
         Conflicts may be caught by view code to provide specific error messaging.
         This implementation is probably good enough as a general fallback.
+
+        Note - if using jsform, this response works well if you add the 
+        following to your base javascript:
+
+            addEventListener('jsformerror', function(e) {
+                var r = e.detail;
+                if (r.status == 409 && r.responseText) {
+                    alert(r.responseText);
+                    e.preventDefault();
+                    e.target.removeAttribute('block-submissions');
+                }
+            });
         '''
         return http.HttpResponse(exception.message, content_type='text/plain', status=409)
