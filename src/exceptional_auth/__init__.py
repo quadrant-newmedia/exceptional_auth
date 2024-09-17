@@ -1,5 +1,9 @@
 from django import http
+from django.contrib.auth.models import AnonymousUser, AbstractUser
+from django.http import HttpRequest, HttpResponse
 from django.utils.translation import gettext as _
+
+from typing import Callable
 
 class AuthException(Exception):
     '''
@@ -25,7 +29,7 @@ class PermissionDenied(AuthException):
 
     App developers should call require_permission() when checking for standard django permissions, but they may also raise this directly when performing other custom permission checks.
     '''
-    def __init__(self, message=None):
+    def __init__(self, message: 'str|None'=None):
         self.message = message
 
 class NotCurrentlyAllowed(AuthException):
@@ -36,7 +40,7 @@ class NotCurrentlyAllowed(AuthException):
 
     Site developers should catch this and display a generic error message to the user.
     '''
-    def __init__(self, reason):
+    def __init__(self, reason: str):
         self.reason = reason
 
 class Conflict(AuthException):
@@ -47,7 +51,7 @@ class Conflict(AuthException):
     Note that this could be thrown from anywhere (even model code).
     Expect the message to be presented directly to the end user.
     '''
-    def __init__(self, message, code=None):
+    def __init__(self, message: str, code: 'int|None'=None):
         '''
         message should fully decribe why action can't proceed,
         and, ideally, what user can do to fix it. 
@@ -63,13 +67,15 @@ class Conflict(AuthException):
     def __str__(self):
         return str(self.message)
 
-def require_login(request):
+def require_login(request: HttpRequest):
     if request.user.is_anonymous :
         raise LoginRequired()
 
-def require_permissions(request, *permission_names):
+def require_permissions(request: HttpRequest, *permission_names: str):
     require_login(request)
     user = request.user
+    if not isinstance(user, (AnonymousUser, AbstractUser)):
+        raise Exception('This only work on sites where the custom user model inherits AbstractUser')
     for permission_name in permission_names :
         # TODO - if DEBUG, should we validate that permission_name is actually a valid permission name?
         if not user.has_perm(permission_name) :
@@ -77,16 +83,16 @@ def require_permissions(request, *permission_names):
 
 class BaseMiddleware:
     '''
-        A Middleware base class which site developers can extend, to make handling our exceptions easier.
+    A Middleware base class which site developers can extend, to make handling our exceptions easier.
     '''
 
     # Boilerplate, required by all middleware
-    def __init__(self, get_response):
+    def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]):
         self.get_response = get_response
-    def __call__(self, request):
+    def __call__(self, request: HttpRequest):
         return self.get_response(request)
 
-    def process_exception(self, request, exception):
+    def process_exception(self, request: HttpRequest, exception: Exception):
         if isinstance(exception, LoginRequired) :
             return self.login_required(request, exception)
         if isinstance(exception, PermissionDenied) :
@@ -97,14 +103,14 @@ class BaseMiddleware:
             return self.conflict(request, exception)
 
     # Site developers should override these methods
-    def login_required(self, request, exception):
+    def login_required(self, request: HttpRequest, exception: LoginRequired):
         return http.HttpResponse(_('Login required.'), content_type='text/plain')
-    def permission_denied(self, request, exception):
+    def permission_denied(self, request: HttpRequest, exception: PermissionDenied):
         return http.HttpResponse(_('Permission denied.'), content_type='text/plain', status=403)
-    def not_currently_allowed(self, request, exception):
+    def not_currently_allowed(self, request: HttpRequest, exception: NotCurrentlyAllowed):
         return http.HttpResponse(f'{_("Not currently allowed")}: {exception.reason}', content_type='text/plain', status=403)
-
-    def conflict(self, request, exception):
+    
+    def conflict(self, request: HttpRequest, exception: Conflict):
         '''
         This implementation likely doesn't need to be overridden.
         Conflicts may be caught by view code to provide specific error messaging.
