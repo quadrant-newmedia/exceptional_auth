@@ -1,3 +1,6 @@
+## 0.6.0
+Explicit Django 5 support
+
 ## 0.5.0
 Add type annotations
 
