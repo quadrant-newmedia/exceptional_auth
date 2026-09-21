@@ -1,3 +1,6 @@
+## 0.7.0
+Explicit Django 6 support
+
 ## 0.6.0
 Explicit Django 5 support
 

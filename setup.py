@@ -25,7 +25,7 @@ setuptools.setup(
     ],
     python_requires=">=3.7",
     install_requires=[
-        "Django>=3,<6",
+        "Django>=3,<7",
         "django-types>=0.19.1,<1",
     ],
 )
